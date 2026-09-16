@@ -78,7 +78,7 @@ before they can sign in. For getting started, turn that off:
 <https://elevenlabs.io> → click your profile (bottom-left) → **API Keys** → **Create API Key**.
 Copy it now; it's only shown once.
 
-The app uses the `scribe_realtime_v2` model via a single-use token. If you create a
+The app uses the `scribe_v2_realtime` model via a single-use token. If you create a
 *restricted* key, it needs access to **Speech to Text**.
 
 ## Step 4 — Write `.env.local`

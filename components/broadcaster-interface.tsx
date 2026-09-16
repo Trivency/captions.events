@@ -117,7 +117,8 @@ export function BroadcasterInterface({
   const languageDetectorRef = useRef<LanguageDetector | null>(null);
 
   const scribe = useScribe({
-    modelId: "scribe_realtime_v2",
+    modelId: "scribe_v2_realtime",
+    includeLanguageDetection: true,
     onPartialTranscript: async (data) => {
       console.log("Partial:", { data });
       setPartialText(data.text);
@@ -143,7 +144,7 @@ export function BroadcasterInterface({
         });
       }
     },
-    onFinalTranscript: async (data) => {
+    onCommittedTranscriptWithTimestamps: async (data) => {
       console.log("Final:", data.text);
       setPartialText("");
 
@@ -185,6 +186,14 @@ export function BroadcasterInterface({
         error instanceof Error ? error.message : "Unknown error";
       setError(`Transcription error: ${errorMessage}`);
     },
+    onAuthError: (data) => setError(`ElevenLabs auth error: ${data.error}`),
+    onQuotaExceededError: (data) =>
+      setError(`ElevenLabs quota exceeded: ${data.error}`),
+    onUnacceptedTermsError: (data) =>
+      setError(`ElevenLabs terms not accepted: ${data.error}`),
+    onTranscriberError: (data) =>
+      setError(`ElevenLabs transcriber error: ${data.error}`),
+    onDisconnect: () => setIsRecording(false),
   });
 
   // Detect language from text
@@ -335,7 +344,7 @@ export function BroadcasterInterface({
 
       // Add language if specified (otherwise auto-detect)
       if (selectedLanguage) {
-        connectOptions.language = selectedLanguage;
+        connectOptions.languageCode = selectedLanguage;
       }
 
       await scribe.connect(connectOptions);
