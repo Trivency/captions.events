@@ -119,6 +119,28 @@ Open <http://localhost:3000> **in Chrome** (see "Browser requirements" below).
 
 If all six steps work, you're done.
 
+## Putting captions on a projector / second screen (HDMI)
+
+The broadcast page also shows a **Projector / Second Screen** link: `/display/<uid>`.
+It's a bare full-screen page — black background, large white text, the last few lines,
+nothing else.
+
+1. Plug in the HDMI display and set it to **Extend** (not mirror) in your OS display settings.
+2. On the broadcast page, click the open-in-new-tab button next to the projector link.
+3. Drag that Chrome window onto the external display and press **F11** for full screen.
+4. Keep the broadcast tab on your laptop screen and click **Start Recording**.
+
+Tune the look with query params on the URL, e.g.
+`http://localhost:3000/display/<uid>?lines=2&size=6&bg=black&fg=yellow`
+
+| Param | Default | Meaning |
+|---|---|---|
+| `lines` | `3` | finished lines kept on screen (1–10) |
+| `size` | `5` | font size in % of screen width (1–15) |
+| `bg` / `fg` | `black` / `white` | background / text color (hex like `#000` or a CSS name) |
+
+A small dot in the bottom-right corner is green when the page is connected to Supabase Realtime.
+
 ---
 
 ## Browser requirements
