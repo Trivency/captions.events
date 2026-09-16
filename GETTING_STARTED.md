@@ -139,7 +139,7 @@ Move the mouse or press **S** to open the settings panel. Everything applies liv
 | Text | visible **lines** (1–8), **size**, font (sans / condensed / serif / mono), color, ALL CAPS, outline, left/center, side margin |
 | Band | position (bottom / top), band color, band opacity |
 | Screen / key color | Black, **Green**, **Blue**, Magenta, or any custom color — use green/blue when a video switcher will chroma-key the captions over program video |
-| Branding | show the event title, logo and tagline on the band; toggle the connection dot |
+| Other | toggle the small connection dot |
 
 Keyboard: `S` settings · `F` fullscreen · `+` / `-` size · `[` / `]` lines · `Esc` close panel.
 
@@ -151,8 +151,8 @@ machine, e.g.
 ### Branding for remote viewers
 
 On the broadcast page, the **Branding** card sets a logo URL, brand color and tagline for the
-event. The viewer page (`/view/<uid>`) shows them in its header, and the display band can show
-them too (Branding → "Show event title / logo on band").
+event. The viewer page (`/view/<uid>`) shows them in its header. The projector display is
+deliberately captions-only and never shows branding.
 
 This needs one extra column in the database. If you created your Supabase project before this
 feature existed, run `supabase/migrations/20260916000000_event_theme.sql` in the SQL Editor

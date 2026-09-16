@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { DisplayInterface } from "@/components/display-interface"
-import { sanitizeTheme } from "@/lib/event-theme"
 
 interface DisplayPageProps {
   params: Promise<{
@@ -42,12 +41,7 @@ export default async function DisplayPage({ params, searchParams }: DisplayPageP
 
   return (
     <DisplayInterface
-      event={{
-        id: event.id,
-        uid: event.uid,
-        title: event.title,
-        theme: sanitizeTheme(event.theme),
-      }}
+      event={{ id: event.id, uid: event.uid, title: event.title }}
       initialQuery={initialQuery}
     />
   )

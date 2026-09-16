@@ -2,14 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
-import type { EventTheme } from "@/lib/event-theme";
 import { HEX_COLOR } from "@/lib/event-theme";
 
 interface Event {
   id: string;
   uid: string;
   title: string;
-  theme?: EventTheme | null;
 }
 
 interface Caption {
@@ -56,8 +54,6 @@ export interface DisplaySettings {
   /** horizontal safe margin, vw */
   margin: number;
   outline: boolean;
-  /** show event title + logo strip on the band */
-  brand: boolean;
   /** show the tiny connection dot */
   status: boolean;
 }
@@ -75,7 +71,6 @@ const DEFAULTS: DisplaySettings = {
   caps: false,
   margin: 4,
   outline: false,
-  brand: false,
   status: true,
 };
 
@@ -131,7 +126,6 @@ function parseSettings(
     caps: bool(q.caps, base.caps),
     margin: num(q.margin, base.margin, 0, 20),
     outline: bool(q.outline, base.outline),
-    brand: bool(q.brand, base.brand),
     status: bool(q.status, base.status),
   };
 }
@@ -170,7 +164,6 @@ export function DisplayInterface({
   initialCaptions = [],
 }: DisplayInterfaceProps) {
   const storageKey = `display:${event.uid}`;
-  const theme = event.theme ?? {};
 
   // URL params win over saved settings, which win over defaults
   const [settings, setSettings] = useState<DisplaySettings>(() =>
@@ -360,8 +353,6 @@ export function DisplayInterface({
   }, [settings]);
 
   const textAreaHeight = `calc(${settings.lines} * ${settings.size}vw * ${LINE_HEIGHT})`;
-  const brandColor = theme.brand_color ?? "#ffffff";
-  const showBrand = settings.brand && (theme.logo_url || event.title);
 
   return (
     <div
@@ -383,28 +374,6 @@ export function DisplayInterface({
           paddingBottom: "0.5em",
         }}
       >
-        {showBrand && (
-          <div
-            className="flex items-center gap-[0.5em] mb-[0.35em]"
-            style={{
-              fontSize: "0.4em",
-              lineHeight: 1.2,
-              justifyContent: settings.align === "center" ? "center" : "flex-start",
-              opacity: 0.9,
-              textTransform: "none",
-            }}
-          >
-            {theme.logo_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={theme.logo_url} alt="" style={{ height: "2.2em", width: "auto" }} />
-            )}
-            <span style={{ color: brandColor, fontWeight: 700 }}>{event.title}</span>
-            {theme.tagline && (
-              <span style={{ opacity: 0.7, fontWeight: 400 }}>· {theme.tagline}</span>
-            )}
-          </div>
-        )}
-
         {/* Fixed-height text window: exactly N lines visible, newest at the bottom */}
         <div
           className="flex flex-col justify-end overflow-hidden"
@@ -594,18 +563,7 @@ export function DisplayInterface({
               </p>
             </Section>
 
-            <Section title="Branding">
-              <Toggle
-                label="Show event title / logo on band"
-                checked={settings.brand}
-                onChange={(v) => update({ brand: v })}
-              />
-              {!theme.logo_url && !theme.tagline && (
-                <p className="text-xs text-neutral-400">
-                  Set a logo, brand color and tagline in the Branding card on the
-                  broadcast page.
-                </p>
-              )}
+            <Section title="Other">
               <Toggle
                 label="Connection dot"
                 checked={settings.status}

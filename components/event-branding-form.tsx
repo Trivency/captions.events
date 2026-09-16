@@ -17,7 +17,7 @@ interface EventBrandingFormProps {
 
 /**
  * Lets the event creator set a logo, brand color and tagline. Saved to
- * events.theme and picked up by the viewer page and the display band.
+ * events.theme and picked up by the viewer page.
  */
 export function EventBrandingForm({ eventId, initialTheme }: EventBrandingFormProps) {
   const [logoUrl, setLogoUrl] = useState(initialTheme.logo_url ?? "")
@@ -63,7 +63,7 @@ export function EventBrandingForm({ eventId, initialTheme }: EventBrandingFormPr
           <CardTitle>Branding</CardTitle>
         </div>
         <CardDescription>
-          Shown to remote viewers and, optionally, on the projector band. Changes apply live.
+          Shown to remote viewers on the web viewer page. The projector display stays captions-only.
         </CardDescription>
       </CardHeader>
       <CardContent>
