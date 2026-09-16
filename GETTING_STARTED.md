@@ -121,25 +121,42 @@ If all six steps work, you're done.
 
 ## Putting captions on a projector / second screen (HDMI)
 
-The broadcast page also shows a **Projector / Second Screen** link: `/display/<uid>`.
-It's a bare full-screen page — black background, large white text, the last few lines,
-nothing else.
+The broadcast page shows a **Projector / Second Screen** link: `/display/<uid>`. It's a
+bare page: a caption band (black by default) with a fixed number of visible lines, and the
+rest of the screen in a solid "key" color.
 
 1. Plug in the HDMI display and set it to **Extend** (not mirror) in your OS display settings.
 2. On the broadcast page, click the open-in-new-tab button next to the projector link.
-3. Drag that Chrome window onto the external display and press **F11** for full screen.
+3. Drag that Chrome window onto the external display and press **F** (or F11) for full screen.
 4. Keep the broadcast tab on your laptop screen and click **Start Recording**.
 
-Tune the look with query params on the URL, e.g.
-`http://localhost:3000/display/<uid>?lines=2&size=6&bg=black&fg=yellow`
+### Adjusting the look
 
-| Param | Default | Meaning |
-|---|---|---|
-| `lines` | `3` | finished lines kept on screen (1–10) |
-| `size` | `5` | font size in % of screen width (1–15) |
-| `bg` / `fg` | `black` / `white` | background / text color (hex like `#000` or a CSS name) |
+Move the mouse or press **S** to open the settings panel. Everything applies live:
 
-A small dot in the bottom-right corner is green when the page is connected to Supabase Realtime.
+| Section | Controls |
+|---|---|
+| Text | visible **lines** (1–8), **size**, font (sans / condensed / serif / mono), color, ALL CAPS, outline, left/center, side margin |
+| Band | position (bottom / top), band color, band opacity |
+| Screen / key color | Black, **Green**, **Blue**, Magenta, or any custom color — use green/blue when a video switcher will chroma-key the captions over program video |
+| Branding | show the event title, logo and tagline on the band; toggle the connection dot |
+
+Keyboard: `S` settings · `F` fullscreen · `+` / `-` size · `[` / `]` lines · `Esc` close panel.
+
+Settings are saved per event in the browser **and** mirrored into the URL, so
+"Copy link with these settings" gives you a link that reproduces the exact look on another
+machine, e.g.
+`http://localhost:3000/display/<uid>?lines=2&size=4&key=%2300ff00&pos=bottom&caps=1`
+
+### Branding for remote viewers
+
+On the broadcast page, the **Branding** card sets a logo URL, brand color and tagline for the
+event. The viewer page (`/view/<uid>`) shows them in its header, and the display band can show
+them too (Branding → "Show event title / logo on band").
+
+This needs one extra column in the database. If you created your Supabase project before this
+feature existed, run `supabase/migrations/20260916000000_event_theme.sql` in the SQL Editor
+(it's a single `ALTER TABLE`). Fresh projects get it from `supabase/setup_all.sql`.
 
 ---
 

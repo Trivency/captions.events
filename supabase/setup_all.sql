@@ -1,5 +1,6 @@
 -- All migrations combined for one-shot pasting into the Supabase SQL Editor.
--- Equivalent to running supabase/migrations/*.sql in order.
+-- Equivalent to running supabase/migrations/*.sql in order. For a FRESH project only;
+-- if you already ran the earlier migrations, run just the newest file(s) from supabase/migrations/.
 
 -- ===== supabase/migrations/20251031162352_events.sql =====
 -- Create events table for storing live caption events
@@ -88,4 +89,8 @@ ALTER TABLE captions ADD COLUMN IF NOT EXISTS language_code TEXT;
 -- Create index on language_code for potential filtering/grouping
 CREATE INDEX IF NOT EXISTS idx_captions_language_code ON captions(language_code);
 
+
+-- ===== supabase/migrations/20260916000000_event_theme.sql =====
+-- Per-event branding (logo, brand color, tagline) used by the viewer and display pages
+ALTER TABLE events ADD COLUMN IF NOT EXISTS theme JSONB NOT NULL DEFAULT '{}'::jsonb;
 

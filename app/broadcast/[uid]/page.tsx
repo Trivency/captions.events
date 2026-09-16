@@ -1,6 +1,8 @@
 import { redirect, notFound } from "next/navigation"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { BroadcasterInterface } from "@/components/broadcaster-interface"
+import { EventBrandingForm } from "@/components/event-branding-form"
+import { sanitizeTheme } from "@/lib/event-theme"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Captions } from "lucide-react"
 import Link from "next/link"
@@ -62,8 +64,11 @@ export default async function BroadcastPage({ params }: BroadcastPageProps) {
       </header>
 
       {/* Main Content */}
-      <main className="container mx-auto px-4 py-8">
+      <main className="container mx-auto px-4 py-8 space-y-6">
         <BroadcasterInterface event={event} viewerUrl={viewerUrl} />
+        <div className="max-w-4xl mx-auto">
+          <EventBrandingForm eventId={event.id} initialTheme={sanitizeTheme(event.theme)} />
+        </div>
       </main>
     </div>
   )
