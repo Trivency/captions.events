@@ -275,19 +275,34 @@ export function DisplayInterface({
         )}
       </div>
 
-      {/* Gear button (appears on mouse move) */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.stopPropagation();
-          setPanelOpen((o) => !o);
-        }}
-        className="absolute top-3 left-3 rounded-full bg-black/70 text-white text-sm px-3 py-1.5 transition-opacity"
+      {/* Toolbar (appears on mouse move) */}
+      <div
+        className="absolute top-3 left-3 flex gap-2 transition-opacity"
         style={{ opacity: chromeVisible || panelOpen ? 1 : 0, fontFamily: FONT_STACKS.sans }}
-        aria-label="Display settings"
       >
-        ⚙ Settings <span className="opacity-60">(S)</span>
-      </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            toggleFullscreen();
+          }}
+          className="rounded-full bg-black/70 text-white text-sm px-3 py-1.5 hover:bg-black/90"
+          aria-label="Toggle full screen"
+        >
+          ⛶ Fullscreen <span className="opacity-60">(F)</span>
+        </button>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setPanelOpen((o) => !o);
+          }}
+          className="rounded-full bg-black/70 text-white text-sm px-3 py-1.5 hover:bg-black/90"
+          aria-label="Display settings"
+        >
+          ⚙ Settings <span className="opacity-60">(S)</span>
+        </button>
+      </div>
 
       {/* Local overlay — tweaks this window only; the broadcast page is the main control */}
       {panelOpen && (
