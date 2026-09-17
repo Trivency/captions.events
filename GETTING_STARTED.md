@@ -130,9 +130,11 @@ rest of the screen in a solid "key" color.
 3. Drag that Chrome window onto the external display and press **F** (or F11) for full screen.
 4. Keep the broadcast tab on your laptop screen and click **Start Recording**.
 
-### Adjusting the look
+### Adjusting the look (from the broadcast page)
 
-Move the mouse or press **S** to open the settings panel. Everything applies live:
+The **Projector Display** card on the broadcast page is the control surface. Every change
+applies live to any open display window and is saved on the event, so the display comes back
+with the same look after a reload:
 
 | Section | Controls |
 |---|---|
@@ -141,12 +143,11 @@ Move the mouse or press **S** to open the settings panel. Everything applies liv
 | Screen / key color | Black, **Green**, **Blue**, Magenta, or any custom color — use green/blue when a video switcher will chroma-key the captions over program video |
 | Other | toggle the small connection dot |
 
-Keyboard: `S` settings · `F` fullscreen · `+` / `-` size · `[` / `]` lines · `Esc` close panel.
+The copy button next to the display link copies a URL with the current settings baked in
+(handy for a second machine). Saving needs the `theme` column — see Branding below.
 
-Settings are saved per event in the browser **and** mirrored into the URL, so
-"Copy link with these settings" gives you a link that reproduces the exact look on another
-machine, e.g.
-`http://localhost:3000/display/<uid>?lines=2&size=4&key=%2300ff00&pos=bottom&caps=1`
+On the display window itself, **S** opens a local overlay with the same controls for quick
+tweaks to that window only; **F** toggles full screen; `+`/`-` size; `[`/`]` lines.
 
 ### Branding for remote viewers
 

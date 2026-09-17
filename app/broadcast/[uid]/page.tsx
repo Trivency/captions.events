@@ -2,7 +2,9 @@ import { redirect, notFound } from "next/navigation"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { BroadcasterInterface } from "@/components/broadcaster-interface"
 import { EventBrandingForm } from "@/components/event-branding-form"
+import { DisplayControlPanel } from "@/components/display-control-panel"
 import { sanitizeTheme } from "@/lib/event-theme"
+import { parseDisplaySettings } from "@/lib/display-settings"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft, Captions } from "lucide-react"
 import Link from "next/link"
@@ -37,7 +39,10 @@ export default async function BroadcastPage({ params }: BroadcastPageProps) {
     redirect("/dashboard")
   }
 
-  const viewerUrl = `${process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"}/view/${uid}`
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000"
+  const viewerUrl = `${siteUrl}/view/${uid}`
+  const displayUrl = `${siteUrl}/display/${uid}`
+  const theme = sanitizeTheme(event.theme)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
@@ -66,8 +71,14 @@ export default async function BroadcastPage({ params }: BroadcastPageProps) {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8 space-y-6">
         <BroadcasterInterface event={event} viewerUrl={viewerUrl} />
-        <div className="max-w-4xl mx-auto">
-          <EventBrandingForm eventId={event.id} initialTheme={sanitizeTheme(event.theme)} />
+        <div className="max-w-4xl mx-auto space-y-6">
+          <DisplayControlPanel
+            eventId={event.id}
+            eventUid={event.uid}
+            displayUrl={displayUrl}
+            initialSettings={parseDisplaySettings(theme.display)}
+          />
+          <EventBrandingForm eventId={event.id} initialTheme={theme} />
         </div>
       </main>
     </div>

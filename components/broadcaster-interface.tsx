@@ -223,8 +223,6 @@ export function BroadcasterInterface({
     []
   );
 
-  const displayUrl = viewerUrl.replace("/view/", "/display/");
-
   const copyViewerLink = () => {
     navigator.clipboard.writeText(viewerUrl);
     setCopied(true);
@@ -481,24 +479,6 @@ export function BroadcasterInterface({
               <p className="text-xs text-muted-foreground mt-2">
                 Share this link with your audience to let them view live
                 captions
-              </p>
-            </div>
-            <div>
-              <p className="text-sm font-medium mb-2">Projector / Second Screen</p>
-              <div className="flex gap-2">
-                <div className="flex-1 bg-muted px-3 py-2 rounded-md text-sm font-mono truncate">
-                  {displayUrl}
-                </div>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/display/${event.uid}`} target="_blank">
-                    <ExternalLink className="h-4 w-4" />
-                  </Link>
-                </Button>
-              </div>
-              <p className="text-xs text-muted-foreground mt-2">
-                Full-screen captions only, no page chrome. Drag the window to
-                the external display and press F11. Tune with
-                ?lines=3&size=5&bg=black&fg=white
               </p>
             </div>
           </div>

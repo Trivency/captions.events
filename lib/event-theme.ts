@@ -7,8 +7,10 @@ export interface EventTheme {
   logo_url?: string
   /** Brand accent color, hex */
   brand_color?: string
-  /** Short line shown under the title on the viewer page and on the display band */
+  /** Short line shown under the title on the viewer page */
   tagline?: string
+  /** Projector display settings (see lib/display-settings.ts); validated there */
+  display?: Record<string, unknown>
 }
 
 export const HEX_COLOR = /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/
@@ -25,6 +27,9 @@ export function sanitizeTheme(input: unknown): EventTheme {
   }
   if (typeof t.tagline === "string" && t.tagline.trim()) {
     out.tagline = t.tagline.trim().slice(0, 120)
+  }
+  if (t.display && typeof t.display === "object") {
+    out.display = t.display as Record<string, unknown>
   }
   return out
 }

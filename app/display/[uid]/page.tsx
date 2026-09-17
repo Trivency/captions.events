@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation"
 import { getSupabaseServerClient } from "@/lib/supabase/server"
 import { DisplayInterface } from "@/components/display-interface"
+import { sanitizeTheme } from "@/lib/event-theme"
+import { parseDisplaySettings } from "@/lib/display-settings"
 
 interface DisplayPageProps {
   params: Promise<{
@@ -10,13 +12,10 @@ interface DisplayPageProps {
 }
 
 /**
- * Full-screen caption output for a projector, second monitor, or a video
- * switcher (chroma key). Settings live in the on-screen panel (press S) and
- * are mirrored into the query string so a look can be bookmarked or shared:
- *
- *   /display/<uid>?lines=2&size=4&key=%2300ff00&band=%23000000&pos=bottom
- *
- * See DisplaySettings in components/display-interface.tsx for every param.
+ * Full-screen caption display for a projector, second monitor, or a video
+ * switcher (chroma key). Its look is controlled from the broadcast page
+ * ("Projector Display" card): saved on the event and pushed live. Query params
+ * act as a one-off override for this window, e.g. ?lines=3&key=%2300ff00.
  */
 export default async function DisplayPage({ params, searchParams }: DisplayPageProps) {
   const { uid } = await params
@@ -39,9 +38,12 @@ export default async function DisplayPage({ params, searchParams }: DisplayPageP
     initialQuery[k] = Array.isArray(v) ? v[0] : v
   }
 
+  const theme = sanitizeTheme(event.theme)
+
   return (
     <DisplayInterface
       event={{ id: event.id, uid: event.uid, title: event.title }}
+      serverSettings={parseDisplaySettings(theme.display)}
       initialQuery={initialQuery}
     />
   )

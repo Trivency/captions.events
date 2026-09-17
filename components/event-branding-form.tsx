@@ -34,7 +34,12 @@ export function EventBrandingForm({ eventId, initialTheme }: EventBrandingFormPr
     setError(null)
     setSaved(false)
 
-    const theme = sanitizeTheme({ logo_url: logoUrl, brand_color: brandColor, tagline })
+    const branding = sanitizeTheme({ logo_url: logoUrl, brand_color: brandColor, tagline })
+
+    // Merge so the projector display settings stored alongside are kept
+    const { data: row } = await supabase.from("events").select("theme").eq("id", eventId).single()
+    const existing = (row?.theme as Record<string, unknown> | null) ?? {}
+    const theme = { ...existing, logo_url: undefined, brand_color: undefined, tagline: undefined, ...branding }
 
     const { error: updateError } = await supabase
       .from("events")
