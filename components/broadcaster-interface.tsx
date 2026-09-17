@@ -174,7 +174,12 @@ export function BroadcasterInterface({
         if (insertError) {
           console.error("Error saving caption:", insertError);
         } else if (insertedCaption) {
-          setCaptions((prev) => [...prev, insertedCaption]);
+          // Realtime may have delivered this row before the insert returned
+          setCaptions((prev) =>
+            prev.some((c) => c.id === insertedCaption.id)
+              ? prev
+              : [...prev, insertedCaption]
+          );
         }
       } catch (err) {
         console.error("Error saving caption:", err);
