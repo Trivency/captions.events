@@ -100,6 +100,12 @@ export function BroadcasterInterface({
 }: BroadcasterInterfaceProps) {
   const [copied, setCopied] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const [reconnecting, setReconnecting] = useState(false);
+  // True between Start and Stop; drives auto-reconnect when the session drops
+  const wantRecordingRef = useRef(false);
+  const reconnectAttemptRef = useRef(0);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const reconnectRef = useRef<() => void>(() => {});
   const [error, setError] = useState<string | null>(null);
   const [captions, setCaptions] = useState<Caption[]>([]);
   const [partialText, setPartialText] = useState("");
@@ -198,7 +204,17 @@ export function BroadcasterInterface({
       setError(`ElevenLabs terms not accepted: ${data.error}`),
     onTranscriberError: (data) =>
       setError(`ElevenLabs transcriber error: ${data.error}`),
-    onDisconnect: () => setIsRecording(false),
+    onSessionTimeLimitExceededError: () => {
+      console.warn("Scribe session time limit reached; reconnecting");
+      reconnectRef.current();
+    },
+    onDisconnect: () => {
+      if (wantRecordingRef.current) {
+        reconnectRef.current();
+      } else {
+        setIsRecording(false);
+      }
+    },
   });
 
   // Detect language from text
@@ -317,51 +333,89 @@ export function BroadcasterInterface({
     }
   };
 
+  const connectScribe = async () => {
+    // Fetch a single use token from the server
+    const token = await fetchToken();
+
+    const microphoneOptions: any = {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+    };
+
+    // Only add deviceId if one is selected
+    if (selectedDeviceId) {
+      microphoneOptions.deviceId = selectedDeviceId;
+    }
+
+    console.log(
+      "Starting recording with microphone options:",
+      microphoneOptions
+    );
+
+    const connectOptions: any = {
+      token,
+      microphone: microphoneOptions,
+    };
+
+    // Add language if specified (otherwise auto-detect)
+    if (selectedLanguage) {
+      connectOptions.languageCode = selectedLanguage;
+    }
+
+    await scribe.connect(connectOptions);
+  };
+
   const handleStartRecording = async () => {
     try {
       setError(null);
-
-      // Fetch a single use token from the server
-      const token = await fetchToken();
-
-      const microphoneOptions: any = {
-        echoCancellation: true,
-        noiseSuppression: true,
-        autoGainControl: true,
-      };
-
-      // Only add deviceId if one is selected
-      if (selectedDeviceId) {
-        microphoneOptions.deviceId = selectedDeviceId;
-      }
-
-      console.log(
-        "Starting recording with microphone options:",
-        microphoneOptions
-      );
-
-      const connectOptions: any = {
-        token,
-        microphone: microphoneOptions,
-      };
-
-      // Add language if specified (otherwise auto-detect)
-      if (selectedLanguage) {
-        connectOptions.languageCode = selectedLanguage;
-      }
-
-      await scribe.connect(connectOptions);
-
+      wantRecordingRef.current = true;
+      reconnectAttemptRef.current = 0;
+      await connectScribe();
       setIsRecording(true);
     } catch (err) {
       console.error("Error starting recording:", err);
+      wantRecordingRef.current = false;
       setError(
         err instanceof Error ? err.message : "Failed to start recording"
       );
     }
   };
 
+  // Re-establish the session after a drop (time limit, network blip) with
+  // backoff, for as long as the operator hasn't pressed Stop.
+  reconnectRef.current = () => {
+    if (!wantRecordingRef.current || reconnectTimerRef.current) return;
+    const attempt = reconnectAttemptRef.current++;
+    const delay = Math.min(15000, 1000 * 2 ** Math.min(attempt, 4));
+    setReconnecting(true);
+    setPartialText("");
+    reconnectTimerRef.current = setTimeout(async () => {
+      reconnectTimerRef.current = null;
+      if (!wantRecordingRef.current) return;
+      try {
+        await connectScribe();
+        reconnectAttemptRef.current = 0;
+        setReconnecting(false);
+        setError(null);
+        setIsRecording(true);
+      } catch (err) {
+        console.error("Reconnect failed:", err);
+        setError(
+          `Reconnecting… (${err instanceof Error ? err.message : "failed"})`
+        );
+        reconnectRef.current();
+      }
+    }, delay);
+  };
+
   const handleStopRecording = async () => {
+    wantRecordingRef.current = false;
+    if (reconnectTimerRef.current) {
+      clearTimeout(reconnectTimerRef.current);
+      reconnectTimerRef.current = null;
+    }
+    setReconnecting(false);
     try {
       await scribe.disconnect();
       setIsRecording(false);
@@ -503,9 +557,11 @@ export function BroadcasterInterface({
         <CardHeader>
           <CardTitle>Broadcasting Controls</CardTitle>
           <CardDescription>
-            {isRecording
-              ? "Recording audio and transcribing in real-time"
-              : "Start recording to begin live transcription"}
+            {reconnecting
+              ? "Connection dropped — reconnecting automatically"
+              : isRecording
+                ? "Recording audio and transcribing in real-time"
+                : "Start recording to begin live transcription"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -563,7 +619,6 @@ export function BroadcasterInterface({
                   size="lg"
                   variant="destructive"
                   onClick={handleStopRecording}
-                  disabled={!scribe.isConnected}
                   className="gap-2"
                 >
                   <MicOff className="h-5 w-5" />
@@ -576,11 +631,13 @@ export function BroadcasterInterface({
               <div className="space-y-2">
                 <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
                   <div className="flex gap-1">
-                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-75"></span>
-                    <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse delay-150"></span>
+                    <span className={`w-2 h-2 rounded-full animate-pulse ${reconnecting ? "bg-amber-500" : "bg-red-500"}`}></span>
+                    <span className={`w-2 h-2 rounded-full animate-pulse delay-75 ${reconnecting ? "bg-amber-500" : "bg-red-500"}`}></span>
+                    <span className={`w-2 h-2 rounded-full animate-pulse delay-150 ${reconnecting ? "bg-amber-500" : "bg-red-500"}`}></span>
                   </div>
-                  <span className="font-medium">Recording in progress</span>
+                  <span className="font-medium">
+                    {reconnecting ? "Reconnecting…" : "Recording in progress"}
+                  </span>
                 </div>
 
                 {/* Language Detection Indicator */}
